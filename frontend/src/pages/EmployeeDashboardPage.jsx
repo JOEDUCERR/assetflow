@@ -1,4 +1,5 @@
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
+import DashboardLayout from '../components/DashboardLayout'
 import { useAuth } from '../context/AuthContext'
 
 export default function EmployeeDashboardPage() {
@@ -13,38 +14,34 @@ export default function EmployeeDashboardPage() {
   }
 
   return (
-    <div className="dashboard-page">
-      <header className="dashboard-header">
-        <div>
-          <p className="dashboard-eyebrow">Employee portal</p>
-          <h1>Welcome, {user.name}</h1>
-          <p className="dashboard-subtitle">
-            {user.designation} · {user.emp_id}
-          </p>
-        </div>
+    <DashboardLayout
+      eyebrow="Employee portal"
+      title={`Welcome, ${user.name}`}
+      subtitle={`${user.designation} · ${user.emp_id}`}
+      actions={
         <button type="button" className="btn btn-secondary" onClick={logout}>
           Sign out
         </button>
-      </header>
-
+      }
+    >
       <div className="action-grid">
-        <article className="action-card action-card-take">
+        <Link to="/employee/take" className="action-card action-card-take">
           <h2>Take an asset</h2>
-          <p>Scan a QR code to check out equipment assigned to you.</p>
-          <span className="action-badge">Phase 2</span>
-        </article>
+          <p>Scan the asset QR code to check out equipment.</p>
+          <span className="action-cta">Open scanner →</span>
+        </Link>
 
-        <article className="action-card action-card-return">
+        <Link to="/employee/return" className="action-card action-card-return">
           <h2>Return an asset</h2>
           <p>Scan the asset QR code when returning it to IT.</p>
-          <span className="action-badge">Phase 2</span>
-        </article>
+          <span className="action-cta">Open scanner →</span>
+        </Link>
       </div>
 
       <p className="dashboard-note">
-        QR scanning and asset workflows will be added in the next phase. If
-        scanning fails, contact the IT team for manual assignment.
+        If the QR scanner does not work, contact the IT team to assign or return
+        the asset manually.
       </p>
-    </div>
+    </DashboardLayout>
   )
 }

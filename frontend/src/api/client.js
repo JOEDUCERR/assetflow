@@ -33,6 +33,16 @@ async function request(path, options = {}) {
   return data
 }
 
+function withToken(token, options = {}) {
+  return {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...options.headers,
+    },
+  }
+}
+
 export const api = {
   adminLogin: (email, password) =>
     request('/auth/admin/login', {
@@ -53,16 +63,69 @@ export const api = {
     }),
 
   completeProfile: (token, profile) =>
-    request('/auth/employee/profile', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify(profile),
-    }),
+    request(
+      '/auth/employee/profile',
+      withToken(token, {
+        method: 'POST',
+        body: JSON.stringify(profile),
+      }),
+    ),
 
-  getMe: (token) =>
-    request('/auth/me', {
-      headers: { Authorization: `Bearer ${token}` },
-    }),
+  getMe: (token) => request('/auth/me', withToken(token)),
+
+  listAssets: (token, assignedOnly = false) =>
+    request(
+      `/assets?assigned_only=${assignedOnly}`,
+      withToken(token),
+    ),
+
+  createAsset: (token, asset) =>
+    request(
+      '/assets',
+      withToken(token, {
+        method: 'POST',
+        body: JSON.stringify(asset),
+      }),
+    ),
+
+  getAssetHistory: (token, assetId) =>
+    request(`/assets/${assetId}/history`, withToken(token)),
+
+  getAssetQr: (token, assetId) =>
+    request(`/assets/${assetId}/qr`, withToken(token)),
+
+  manualAssignAsset: (token, assetId, empId) =>
+    request(
+      `/assets/${assetId}/assign`,
+      withToken(token, {
+        method: 'POST',
+        body: JSON.stringify({ emp_id: empId }),
+      }),
+    ),
+
+  manualReturnAsset: (token, assetId) =>
+    request(
+      `/assets/${assetId}/return`,
+      withToken(token, { method: 'POST' }),
+    ),
+
+  takeAssetByScan: (token, qrToken) =>
+    request(
+      '/assets/scan/take',
+      withToken(token, {
+        method: 'POST',
+        body: JSON.stringify({ qr_token: qrToken }),
+      }),
+    ),
+
+  returnAssetByScan: (token, qrToken) =>
+    request(
+      '/assets/scan/return',
+      withToken(token, {
+        method: 'POST',
+        body: JSON.stringify({ qr_token: qrToken }),
+      }),
+    ),
 }
 
 export { ApiError }

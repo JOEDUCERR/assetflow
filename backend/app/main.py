@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import CORS_ORIGINS
 from app.database import Base, SessionLocal, engine
-from app.routers import auth
+from app.routers import assets, auth
 from app.seed import seed_admin
 
 
@@ -35,6 +35,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(assets.router)
 
 
 @app.get("/")
