@@ -73,6 +73,8 @@ export const api = {
 
   getMe: (token) => request('/auth/me', withToken(token)),
 
+  getMyAssets: (token) => request('/employee/my-assets', withToken(token)),
+
   listAssets: (token, assignedOnly = false) =>
     request(
       `/assets?assigned_only=${assignedOnly}`,

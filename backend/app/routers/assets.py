@@ -19,6 +19,7 @@ from app.schemas_asset import (
 )
 
 router = APIRouter(prefix="/assets", tags=["assets"])
+employee_router = APIRouter(prefix="/employee", tags=["employee"])
 
 
 def _asset_response(asset: Asset) -> AssetResponse:
@@ -171,6 +172,24 @@ def list_assets(
     if assigned_only:
         query = query.filter(Asset.status == AssetStatus.assigned)
     assets = query.order_by(Asset.created_at.desc()).all()
+    return [_asset_response(asset) for asset in assets]
+
+
+@employee_router.get("/my-assets", response_model=list[AssetResponse])
+def list_my_assets(
+    employee: User = Depends(require_employee),
+    db: Session = Depends(get_db),
+):
+    assets = (
+        db.query(Asset)
+        .options(joinedload(Asset.assigned_to))
+        .filter(
+            Asset.assigned_to_id == employee.id,
+            Asset.status == AssetStatus.assigned,
+        )
+        .order_by(Asset.assigned_at.desc())
+        .all()
+    )
     return [_asset_response(asset) for asset in assets]
 
 
