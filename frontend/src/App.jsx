@@ -3,6 +3,8 @@ import { AuthProvider } from './context/AuthContext'
 import AdminAssetHistoryPage from './pages/AdminAssetHistoryPage'
 import AdminCreateAssetPage from './pages/AdminCreateAssetPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
+import AdminAssetDetailsPage from './pages/AdminAssetDetailsPage'
+import AdminInventoryPage from './pages/AdminInventoryPage'
 import AdminLoginPage from './pages/AdminLoginPage'
 import EmployeeDashboardPage from './pages/EmployeeDashboardPage'
 import EmployeeLoginPage from './pages/EmployeeLoginPage'
@@ -20,7 +22,9 @@ export default function App() {
           <Route path="/" element={<RoleSelectPage />} />
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin" element={<AdminDashboardPage />} />
+          <Route path="/admin/assets" element={<AdminInventoryPage />} />
           <Route path="/admin/assets/new" element={<AdminCreateAssetPage />} />
+          <Route path="/admin/assets/:assetId" element={<AdminAssetDetailsPage />} />
           <Route
             path="/admin/assets/:assetId/history"
             element={<AdminAssetHistoryPage />}

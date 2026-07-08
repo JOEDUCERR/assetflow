@@ -91,6 +91,9 @@ export const api = {
   getAssetHistory: (token, assetId) =>
     request(`/assets/${assetId}/history`, withToken(token)),
 
+  getAsset: (token, assetId) =>
+    request(`/assets/${assetId}`, withToken(token)),
+
   getAssetQr: (token, assetId) =>
     request(`/assets/${assetId}/qr`, withToken(token)),
 

@@ -85,6 +85,9 @@ export default function AdminDashboardPage() {
       subtitle={`Signed in as ${user.email}`}
       actions={
         <div className="header-actions">
+          <Link to="/admin/assets" className="btn btn-secondary">
+            View All Assets
+          </Link>
           <Link to="/admin/assets/new" className="btn btn-primary">
             Create asset
           </Link>
