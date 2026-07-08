@@ -218,7 +218,8 @@ code {
   color: var(--text-h);
 }
 
-.form-field input {
+.form-field input,
+.form-field select {
   width: 100%;
   border: 1px solid var(--border);
   border-radius: 0.75rem;
@@ -228,7 +229,8 @@ code {
   background: var(--code-bg);
 }
 
-.form-field input:focus {
+.form-field input:focus,
+.form-field select:focus {
   outline: 2px solid rgba(240, 45, 58, 0.32);
   border-color: var(--accent);
 }
@@ -366,6 +368,14 @@ code {
   overflow-x: auto;
 }
 
+.inventory-filters {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(150px, 0.35fr) minmax(170px, 0.45fr);
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
 .data-table {
   width: 100%;
   border-collapse: separate;
@@ -445,5 +455,9 @@ code {
 
   .dashboard-header {
     flex-direction: column;
+  }
+
+  .inventory-filters {
+    grid-template-columns: 1fr;
   }
 }

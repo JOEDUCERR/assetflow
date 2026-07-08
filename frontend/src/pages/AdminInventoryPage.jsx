@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { ApiError, api } from '../api/client'
 import DashboardLayout from '../components/DashboardLayout'
@@ -19,6 +19,9 @@ export default function AdminInventoryPage() {
   const [assignTarget, setAssignTarget] = useState(null)
   const [empId, setEmpId] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [locationFilter, setLocationFilter] = useState('all')
 
   const loadAssets = useCallback(async () => {
     setLoading(true)
@@ -40,6 +43,38 @@ export default function AdminInventoryPage() {
       loadAssets()
     }
   }, [loadAssets, user])
+
+  const locationOptions = useMemo(
+    () =>
+      [...new Set(assets.map((asset) => asset.asset_location_id))]
+        .filter(Boolean)
+        .sort(),
+    [assets],
+  )
+
+  const filteredAssets = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase()
+
+    return assets.filter((asset) => {
+      const matchesSearch =
+        !normalizedSearch ||
+        [
+          asset.asset_name,
+          asset.asset_serial_no,
+          asset.assigned_to?.name,
+          asset.assigned_to?.emp_id,
+        ]
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(normalizedSearch))
+
+      const matchesStatus =
+        statusFilter === 'all' || asset.status === statusFilter
+      const matchesLocation =
+        locationFilter === 'all' || asset.asset_location_id === locationFilter
+
+      return matchesSearch && matchesStatus && matchesLocation
+    })
+  }, [assets, locationFilter, searchTerm, statusFilter])
 
   if (!user || user.role !== 'admin') {
     return <Navigate to="/admin/login" replace />
@@ -86,58 +121,105 @@ export default function AdminInventoryPage() {
         ) : assets.length === 0 ? (
           <p>No assets have been created yet.</p>
         ) : (
-          <div className="table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Asset Name</th>
-                  <th>Serial Number</th>
-                  <th>Location</th>
-                  <th>Status</th>
-                  <th>Assigned To</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {assets.map((asset) => (
-                  <tr key={asset.id}>
-                    <td>{asset.asset_name}</td>
-                    <td>{asset.asset_serial_no}</td>
-                    <td>{asset.asset_location_id}</td>
-                    <td>
-                      <span className={`status-badge status-badge-${asset.status}`}>
-                        {asset.status}
-                      </span>
-                    </td>
-                    <td>{assignedTo(asset)}</td>
-                    <td>
-                      <div className="table-actions">
-                        <button
-                          type="button"
-                          className="btn btn-small btn-secondary"
-                          onClick={() => navigate(`/admin/assets/${asset.id}`)}
-                        >
-                          View
-                        </button>
-                        {asset.status === 'available' && (
+          <>
+            <div className="inventory-filters">
+              <label className="form-field">
+                <span>Search</span>
+                <input
+                  type="search"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="Asset, serial, employee..."
+                />
+              </label>
+
+              <label className="form-field">
+                <span>Status</span>
+                <select
+                  value={statusFilter}
+                  onChange={(event) => setStatusFilter(event.target.value)}
+                >
+                  <option value="all">All</option>
+                  <option value="available">Available</option>
+                  <option value="assigned">Assigned</option>
+                </select>
+              </label>
+
+              <label className="form-field">
+                <span>Location</span>
+                <select
+                  value={locationFilter}
+                  onChange={(event) => setLocationFilter(event.target.value)}
+                >
+                  <option value="all">All</option>
+                  {locationOptions.map((location) => (
+                    <option key={location} value={location}>
+                      {location}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            {filteredAssets.length === 0 ? (
+              <p>No assets match the current filters.</p>
+            ) : (
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Asset Name</th>
+                      <th>Serial Number</th>
+                      <th>Location</th>
+                      <th>Status</th>
+                      <th>Assigned To</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredAssets.map((asset) => (
+                      <tr key={asset.id}>
+                        <td>{asset.asset_name}</td>
+                        <td>{asset.asset_serial_no}</td>
+                        <td>{asset.asset_location_id}</td>
+                        <td>
+                          <span
+                            className={`status-badge status-badge-${asset.status}`}
+                          >
+                            {asset.status}
+                          </span>
+                        </td>
+                        <td>{assignedTo(asset)}</td>
+                        <td>
+                          <div className="table-actions">
                           <button
                             type="button"
-                            className="btn btn-small btn-primary"
-                            onClick={() => {
-                              setAssignTarget(asset)
-                              setEmpId('')
-                            }}
+                            className="btn btn-small btn-secondary"
+                            onClick={() => navigate(`/admin/assets/${asset.id}`)}
                           >
-                            Assign
+                            View
                           </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                            {asset.status === 'available' && (
+                              <button
+                                type="button"
+                                className="btn btn-small btn-primary"
+                                onClick={() => {
+                                  setAssignTarget(asset)
+                                  setEmpId('')
+                                }}
+                              >
+                                Assign
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
         )}
       </section>
 
