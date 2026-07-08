@@ -55,6 +55,9 @@ class Asset(Base):
     asset_name = Column(String, nullable=False)
     asset_location_id = Column(String, nullable=False, index=True)
     asset_serial_no = Column(String, unique=True, nullable=False, index=True)
+    category = Column(String, nullable=False, default="", server_default="")
+    manufacturer = Column(String, nullable=False, default="", server_default="")
+    model = Column(String, nullable=False, default="", server_default="")
     qr_token = Column(String, unique=True, nullable=False, index=True)
     status = Column(
         Enum(AssetStatus),

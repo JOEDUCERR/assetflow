@@ -170,6 +170,7 @@ export default function AdminInventoryPage() {
                     <tr>
                       <th>Asset Name</th>
                       <th>Serial Number</th>
+                      <th>Category</th>
                       <th>Location</th>
                       <th>Status</th>
                       <th>Assigned To</th>
@@ -181,6 +182,7 @@ export default function AdminInventoryPage() {
                       <tr key={asset.id}>
                         <td>{asset.asset_name}</td>
                         <td>{asset.asset_serial_no}</td>
+                        <td>{asset.category}</td>
                         <td>{asset.asset_location_id}</td>
                         <td>
                           <span

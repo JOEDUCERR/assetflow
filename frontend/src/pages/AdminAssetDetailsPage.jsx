@@ -77,6 +77,9 @@ export default function AdminAssetDetailsPage() {
               <p>Asset Name: {asset.asset_name}</p>
               <p>Serial Number: {asset.asset_serial_no}</p>
               <p>Asset UUID: {asset.id}</p>
+              <p>Category: {asset.category}</p>
+              <p>Manufacturer: {asset.manufacturer}</p>
+              <p>Model: {asset.model}</p>
               <p>Location: {asset.asset_location_id}</p>
               <p>Status: {asset.status}</p>
               <p>Assigned To: {assignedTo(asset)}</p>

@@ -4,11 +4,29 @@ import { ApiError, api } from '../api/client'
 import DashboardLayout from '../components/DashboardLayout'
 import { useAuth } from '../context/AuthContext'
 
+const ASSET_CATEGORIES = [
+  'Desktop',
+  'Laptop',
+  'Monitor',
+  'Keyboard',
+  'Mouse',
+  'Headphones',
+  'Phone',
+  'Printer',
+  'Cable',
+  'Network Device',
+  'Storage Device',
+  'Other',
+]
+
 export default function AdminCreateAssetPage() {
   const { user, token } = useAuth()
   const [assetName, setAssetName] = useState('')
   const [locationId, setLocationId] = useState('')
   const [serialNo, setSerialNo] = useState('')
+  const [category, setCategory] = useState('')
+  const [manufacturer, setManufacturer] = useState('')
+  const [model, setModel] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [created, setCreated] = useState(null)
@@ -27,6 +45,9 @@ export default function AdminCreateAssetPage() {
         asset_name: assetName,
         asset_location_id: locationId,
         asset_serial_no: serialNo,
+        category,
+        manufacturer,
+        model,
       })
       setCreated(result)
     } catch (err) {
@@ -58,6 +79,9 @@ export default function AdminCreateAssetPage() {
               <strong>{created.asset.asset_name}</strong>
             </p>
             <p>Serial: {created.asset.asset_serial_no}</p>
+            <p>Category: {created.asset.category}</p>
+            <p>Manufacturer: {created.asset.manufacturer}</p>
+            <p>Model: {created.asset.model}</p>
             <p>Location: {created.asset.asset_location_id}</p>
             <p>Status: {created.asset.status}</p>
           </div>
@@ -111,6 +135,42 @@ export default function AdminCreateAssetPage() {
               value={serialNo}
               onChange={(event) => setSerialNo(event.target.value)}
               placeholder="SN-123456789"
+              required
+            />
+          </label>
+
+          <label className="form-field">
+            <span>Category</span>
+            <select
+              value={category}
+              onChange={(event) => setCategory(event.target.value)}
+              required
+            >
+              <option value="">Select category</option>
+              {ASSET_CATEGORIES.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="form-field">
+            <span>Manufacturer</span>
+            <input
+              value={manufacturer}
+              onChange={(event) => setManufacturer(event.target.value)}
+              placeholder="Dell"
+              required
+            />
+          </label>
+
+          <label className="form-field">
+            <span>Model</span>
+            <input
+              value={model}
+              onChange={(event) => setModel(event.target.value)}
+              placeholder="Latitude 7420"
               required
             />
           </label>

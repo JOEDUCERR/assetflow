@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.config import CORS_ORIGINS
 from app.database import Base, SessionLocal, engine
@@ -9,9 +10,22 @@ from app.routers import assets, auth
 from app.seed import seed_admin
 
 
+def ensure_asset_metadata_columns() -> None:
+    with engine.begin() as connection:
+        columns = {
+            row[1] for row in connection.execute(text("PRAGMA table_info(assets)"))
+        }
+        for column in ("category", "manufacturer", "model"):
+            if column not in columns:
+                connection.execute(
+                    text(f"ALTER TABLE assets ADD COLUMN {column} VARCHAR NOT NULL DEFAULT ''")
+                )
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     Base.metadata.create_all(bind=engine)
+    ensure_asset_metadata_columns()
     db = SessionLocal()
     try:
         seed_admin(db)

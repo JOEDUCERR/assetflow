@@ -7,6 +7,9 @@ class AssetCreateRequest(BaseModel):
     asset_name: str = Field(min_length=1, max_length=120)
     asset_location_id: str = Field(min_length=1, max_length=50)
     asset_serial_no: str = Field(min_length=1, max_length=80)
+    category: str = Field(min_length=1, max_length=80)
+    manufacturer: str = Field(min_length=1, max_length=120)
+    model: str = Field(min_length=1, max_length=120)
 
 
 class AssetAssignRequest(BaseModel):
@@ -31,6 +34,9 @@ class AssetResponse(BaseModel):
     asset_name: str
     asset_location_id: str
     asset_serial_no: str
+    category: str = ""
+    manufacturer: str = ""
+    model: str = ""
     qr_token: str
     status: str
     assigned_to: AssignedEmployeeSummary | None = None
