@@ -16,8 +16,6 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [actionError, setActionError] = useState('')
-  const [assignTarget, setAssignTarget] = useState(null)
-  const [empId, setEmpId] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
 
   const loadAssets = useCallback(async () => {
@@ -52,26 +50,6 @@ export default function AdminDashboardPage() {
     } catch (err) {
       setActionError(
         err instanceof ApiError ? err.message : 'Unable to return asset',
-      )
-    } finally {
-      setActionLoading(false)
-    }
-  }
-
-  async function handleManualAssign(event) {
-    event.preventDefault()
-    if (!assignTarget) return
-
-    setActionError('')
-    setActionLoading(true)
-    try {
-      await api.manualAssignAsset(token, assignTarget.id, empId)
-      setAssignTarget(null)
-      setEmpId('')
-      await loadAssets()
-    } catch (err) {
-      setActionError(
-        err instanceof ApiError ? err.message : 'Unable to assign asset',
       )
     } finally {
       setActionLoading(false)
@@ -146,16 +124,6 @@ export default function AdminDashboardPage() {
                         </button>
                         <button
                           type="button"
-                          className="btn btn-small btn-secondary"
-                          onClick={() => {
-                            setAssignTarget(asset)
-                            setEmpId('')
-                          }}
-                        >
-                          Assign
-                        </button>
-                        <button
-                          type="button"
                           className="btn btn-small btn-primary"
                           disabled={actionLoading}
                           onClick={() => handleManualReturn(asset.id)}
@@ -171,45 +139,6 @@ export default function AdminDashboardPage() {
           </div>
         )}
       </section>
-
-      {assignTarget && (
-        <div className="modal-backdrop">
-          <div className="modal-card">
-            <h2>Manually assign asset</h2>
-            <p>
-              Assign <strong>{assignTarget.asset_name}</strong> to an employee
-              using their employee ID.
-            </p>
-            <form className="auth-form" onSubmit={handleManualAssign}>
-              <label className="form-field">
-                <span>Employee ID</span>
-                <input
-                  value={empId}
-                  onChange={(event) => setEmpId(event.target.value)}
-                  placeholder="EMP-001"
-                  required
-                />
-              </label>
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setAssignTarget(null)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={actionLoading}
-                >
-                  {actionLoading ? 'Assigning…' : 'Assign asset'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </DashboardLayout>
   )
 }

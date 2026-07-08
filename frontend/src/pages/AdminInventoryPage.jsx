@@ -15,6 +15,10 @@ export default function AdminInventoryPage() {
   const [assets, setAssets] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [actionError, setActionError] = useState('')
+  const [assignTarget, setAssignTarget] = useState(null)
+  const [empId, setEmpId] = useState('')
+  const [actionLoading, setActionLoading] = useState(false)
 
   const loadAssets = useCallback(async () => {
     setLoading(true)
@@ -41,6 +45,26 @@ export default function AdminInventoryPage() {
     return <Navigate to="/admin/login" replace />
   }
 
+  async function handleManualAssign(event) {
+    event.preventDefault()
+    if (!assignTarget) return
+
+    setActionError('')
+    setActionLoading(true)
+    try {
+      await api.manualAssignAsset(token, assignTarget.id, empId)
+      setAssignTarget(null)
+      setEmpId('')
+      await loadAssets()
+    } catch (err) {
+      setActionError(
+        err instanceof ApiError ? err.message : 'Unable to assign asset',
+      )
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
   return (
     <DashboardLayout
       eyebrow="IT Admin"
@@ -54,6 +78,7 @@ export default function AdminInventoryPage() {
       }
     >
       {error && <div className="form-error">{error}</div>}
+      {actionError && <div className="form-error">{actionError}</div>}
 
       <section className="dashboard-panel">
         {loading ? (
@@ -79,16 +104,34 @@ export default function AdminInventoryPage() {
                     <td>{asset.asset_name}</td>
                     <td>{asset.asset_serial_no}</td>
                     <td>{asset.asset_location_id}</td>
-                    <td>{asset.status}</td>
+                    <td>
+                      <span className={`status-badge status-badge-${asset.status}`}>
+                        {asset.status}
+                      </span>
+                    </td>
                     <td>{assignedTo(asset)}</td>
                     <td>
-                      <button
-                        type="button"
-                        className="btn btn-small btn-secondary"
-                        onClick={() => navigate(`/admin/assets/${asset.id}`)}
-                      >
-                        View
-                      </button>
+                      <div className="table-actions">
+                        <button
+                          type="button"
+                          className="btn btn-small btn-secondary"
+                          onClick={() => navigate(`/admin/assets/${asset.id}`)}
+                        >
+                          View
+                        </button>
+                        {asset.status === 'available' && (
+                          <button
+                            type="button"
+                            className="btn btn-small btn-primary"
+                            onClick={() => {
+                              setAssignTarget(asset)
+                              setEmpId('')
+                            }}
+                          >
+                            Assign
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -97,6 +140,45 @@ export default function AdminInventoryPage() {
           </div>
         )}
       </section>
+
+      {assignTarget && (
+        <div className="modal-backdrop">
+          <div className="modal-card">
+            <h2>Manually assign asset</h2>
+            <p>
+              Assign <strong>{assignTarget.asset_name}</strong> to an employee
+              using their employee ID.
+            </p>
+            <form className="auth-form" onSubmit={handleManualAssign}>
+              <label className="form-field">
+                <span>Employee ID</span>
+                <input
+                  value={empId}
+                  onChange={(event) => setEmpId(event.target.value)}
+                  placeholder="EMP-001"
+                  required
+                />
+              </label>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setAssignTarget(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? 'Assigning…' : 'Assign asset'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   )
 }
