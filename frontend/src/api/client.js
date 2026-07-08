@@ -109,6 +109,15 @@ export const api = {
       withToken(token, { method: 'POST' }),
     ),
 
+  previewAssetByScan: (token, qrToken) =>
+    request(
+      '/assets/scan/preview',
+      withToken(token, {
+        method: 'POST',
+        body: JSON.stringify({ qr_token: qrToken }),
+      }),
+    ),
+
   takeAssetByScan: (token, qrToken) =>
     request(
       '/assets/scan/take',

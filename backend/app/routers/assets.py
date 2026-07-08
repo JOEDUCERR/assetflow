@@ -298,6 +298,21 @@ def manual_return_asset(
     )
 
 
+@router.post("/scan/preview", response_model=AssetResponse)
+def preview_asset_by_scan(
+    payload: AssetScanRequest,
+    employee: User = Depends(require_employee),
+    db: Session = Depends(get_db),
+):
+    if not employee.profile_complete:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Complete your profile before scanning assets",
+        )
+
+    return _asset_response(_get_asset_by_token(db, payload.qr_token))
+
+
 @router.post("/scan/take", response_model=AssetActionResponse)
 def take_asset_by_scan(
     payload: AssetScanRequest,
