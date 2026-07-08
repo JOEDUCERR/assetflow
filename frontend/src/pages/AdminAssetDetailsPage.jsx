@@ -14,6 +14,20 @@ function assignedTo(asset) {
   return `${asset.assigned_to.emp_id} - ${asset.assigned_to.name}`
 }
 
+function escapeHtml(value) {
+  return String(value).replace(
+    /[&<>"']/g,
+    (char) =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      })[char],
+  )
+}
+
 export default function AdminAssetDetailsPage() {
   const { assetId } = useParams()
   const { user, token } = useAuth()
@@ -49,6 +63,51 @@ export default function AdminAssetDetailsPage() {
 
   if (!user || user.role !== 'admin') {
     return <Navigate to="/admin/login" replace />
+  }
+
+  function handlePrintQr() {
+    if (!asset || !qr?.qr_code_data_url) return
+
+    const printWindow = window.open('', '_blank', 'width=480,height=640')
+    if (!printWindow) return
+    const assetName = escapeHtml(asset.asset_name)
+    const serialNumber = escapeHtml(asset.asset_serial_no)
+
+    printWindow.document.write(`
+      <!doctype html>
+      <html>
+        <head>
+          <title>${serialNumber} QR</title>
+          <style>
+            body {
+              font-family: "Segoe UI", system-ui, sans-serif;
+              margin: 32px;
+              color: #111;
+              text-align: center;
+            }
+            img {
+              width: 260px;
+              height: 260px;
+            }
+            h1 {
+              font-size: 20px;
+              margin: 18px 0 8px;
+            }
+            p {
+              font-size: 16px;
+              margin: 0;
+            }
+          </style>
+        </head>
+        <body onload="window.print()">
+          <img src="${qr.qr_code_data_url}" alt="QR code for ${assetName}" />
+          <h1>${assetName}</h1>
+          <p>Serial Number: ${serialNumber}</p>
+        </body>
+      </html>
+    `)
+    printWindow.document.close()
+    printWindow.focus()
   }
 
   return (
@@ -88,13 +147,22 @@ export default function AdminAssetDetailsPage() {
 
             <div className="header-actions">
               {qr?.qr_code_data_url && (
-                <a
-                  className="btn btn-secondary"
-                  href={qr.qr_code_data_url}
-                  download={`${asset.asset_serial_no}-qr.png`}
-                >
-                  Download QR
-                </a>
+                <>
+                  <a
+                    className="btn btn-secondary"
+                    href={qr.qr_code_data_url}
+                    download={`${asset.asset_serial_no}-qr.png`}
+                  >
+                    Download QR
+                  </a>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={handlePrintQr}
+                  >
+                    Print QR
+                  </button>
+                </>
               )}
               <Link
                 to={`/admin/assets/${asset.id}/history`}

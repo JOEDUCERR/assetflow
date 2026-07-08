@@ -12,6 +12,10 @@ function formatAction(action) {
   return action.replace(/_/g, ' ')
 }
 
+function csvValue(value) {
+  return `"${String(value ?? '').replace(/"/g, '""')}"`
+}
+
 export default function AdminAssetHistoryPage() {
   const { assetId } = useParams()
   const { user, token } = useAuth()
@@ -44,6 +48,35 @@ export default function AdminAssetHistoryPage() {
     return <Navigate to="/admin/login" replace />
   }
 
+  function handleExportCsv() {
+    const headers = [
+      'Timestamp',
+      'Action',
+      'Employee Name',
+      'Employee ID',
+      'Performed By',
+      'Notes',
+    ]
+    const rows = history.map((entry) => [
+      formatDate(entry.created_at),
+      formatAction(entry.action),
+      entry.employee_name || '',
+      entry.employee_id || '',
+      entry.performed_by_email || '',
+      entry.notes || '',
+    ])
+    const csv = [headers, ...rows]
+      .map((row) => row.map(csvValue).join(','))
+      .join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `asset-history-${assetId}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <DashboardLayout
       eyebrow="IT Admin"
@@ -60,24 +93,43 @@ export default function AdminAssetHistoryPage() {
         )}
 
         {!loading && history.length > 0 && (
-          <div className="history-list">
-            {history.map((entry) => (
-              <article key={entry.id} className="history-item">
-                <div className="history-item-header">
-                  <strong>{formatAction(entry.action)}</strong>
-                  <span>{formatDate(entry.created_at)}</span>
-                </div>
-                <p>By: {entry.performed_by_email}</p>
-                {entry.employee_name && (
-                  <p>
-                    Employee: {entry.employee_name}
-                    {entry.employee_id ? ` (${entry.employee_id})` : ''}
-                  </p>
-                )}
-                {entry.notes && <p className="history-notes">{entry.notes}</p>}
-              </article>
-            ))}
-          </div>
+          <>
+            <div className="header-actions">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleExportCsv}
+              >
+                Export History (CSV)
+              </button>
+            </div>
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                    <th>Employee</th>
+                    <th>Employee ID</th>
+                    <th>Performed By</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((entry) => (
+                    <tr key={entry.id}>
+                      <td>{formatDate(entry.created_at)}</td>
+                      <td>{formatAction(entry.action)}</td>
+                      <td>{entry.employee_name || '—'}</td>
+                      <td>{entry.employee_id || '—'}</td>
+                      <td>{entry.performed_by_email || '—'}</td>
+                      <td>{entry.notes || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </section>
     </DashboardLayout>
