@@ -1,12 +1,14 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import AdminAssetHistoryPage from './pages/AdminAssetHistoryPage'
+import AdminAssetRequestsPage from './pages/AdminAssetRequestsPage'
 import AdminCreateAssetPage from './pages/AdminCreateAssetPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
 import AdminAssetDetailsPage from './pages/AdminAssetDetailsPage'
 import AdminInventoryPage from './pages/AdminInventoryPage'
 import AdminLoginPage from './pages/AdminLoginPage'
 import EmployeeDashboardPage from './pages/EmployeeDashboardPage'
+import EmployeeAssetRequestPage from './pages/EmployeeAssetRequestPage'
 import EmployeeLoginPage from './pages/EmployeeLoginPage'
 import EmployeeProfileSetupPage from './pages/EmployeeProfileSetupPage'
 import EmployeeRegisterPage from './pages/EmployeeRegisterPage'
@@ -25,6 +27,7 @@ export default function App() {
           <Route path="/admin/assets" element={<AdminInventoryPage />} />
           <Route path="/admin/assets/new" element={<AdminCreateAssetPage />} />
           <Route path="/admin/assets/:assetId" element={<AdminAssetDetailsPage />} />
+          <Route path="/admin/asset-requests" element={<AdminAssetRequestsPage />} />
           <Route
             path="/admin/assets/:assetId/history"
             element={<AdminAssetHistoryPage />}
@@ -36,6 +39,7 @@ export default function App() {
             element={<EmployeeProfileSetupPage />}
           />
           <Route path="/employee" element={<EmployeeDashboardPage />} />
+          <Route path="/employee/request" element={<EmployeeAssetRequestPage />} />
           <Route path="/employee/take" element={<EmployeeTakeAssetPage />} />
           <Route path="/employee/return" element={<EmployeeReturnAssetPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

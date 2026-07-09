@@ -25,6 +25,12 @@ class AssetAction(str, enum.Enum):
     manual_returned = "manual_returned"
 
 
+class AssetRequestStatus(str, enum.Enum):
+    pending = "Pending"
+    approved = "Approved"
+    rejected = "Rejected"
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -46,6 +52,7 @@ class User(Base):
     )
 
     assigned_assets = relationship("Asset", back_populates="assigned_to")
+    asset_requests = relationship("AssetRequest", back_populates="employee")
 
 
 class Asset(Base):
@@ -75,11 +82,32 @@ class Asset(Base):
     )
 
     assigned_to = relationship("User", back_populates="assigned_assets")
+    requests = relationship("AssetRequest", back_populates="requested_asset")
     history = relationship(
         "AssetHistory",
         back_populates="asset",
         order_by="desc(AssetHistory.created_at)",
     )
+
+
+class AssetRequest(Base):
+    __tablename__ = "asset_requests"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+    employee_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
+    category = Column(String, nullable=False)
+    requested_asset_id = Column(String, ForeignKey("assets.id"), nullable=True)
+    purpose = Column(String, nullable=False)
+    expected_duration = Column(String, nullable=True)
+    status = Column(
+        Enum(AssetRequestStatus),
+        default=AssetRequestStatus.pending,
+        nullable=False,
+    )
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    employee = relationship("User", back_populates="asset_requests")
+    requested_asset = relationship("Asset", back_populates="requests")
 
 
 class AssetHistory(Base):

@@ -75,6 +75,33 @@ export const api = {
 
   getMyAssets: (token) => request('/employee/my-assets', withToken(token)),
 
+  listRequestableAssets: (token) =>
+    request('/asset-requests/assets', withToken(token)),
+
+  createAssetRequest: (token, payload) =>
+    request(
+      '/asset-requests',
+      withToken(token, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+    ),
+
+  listMyAssetRequests: (token) =>
+    request('/asset-requests/mine', withToken(token)),
+
+  listAssetRequests: (token) =>
+    request('/asset-requests', withToken(token)),
+
+  updateAssetRequestStatus: (token, requestId, status) =>
+    request(
+      `/asset-requests/${requestId}/status`,
+      withToken(token, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      }),
+    ),
+
   listAssets: (token, assignedOnly = false) =>
     request(
       `/assets?assigned_only=${assignedOnly}`,

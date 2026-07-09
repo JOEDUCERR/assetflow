@@ -6,7 +6,7 @@ from sqlalchemy import text
 
 from app.config import CORS_ORIGINS
 from app.database import Base, SessionLocal, engine
-from app.routers import assets, auth
+from app.routers import asset_requests, assets, auth
 from app.seed import seed_admin
 
 
@@ -51,6 +51,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(assets.router)
 app.include_router(assets.employee_router)
+app.include_router(asset_requests.router)
 
 
 @app.get("/")

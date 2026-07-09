@@ -66,6 +66,9 @@ export default function AdminDashboardPage() {
           <Link to="/admin/assets" className="btn btn-secondary">
             View All Assets
           </Link>
+          <Link to="/admin/asset-requests" className="btn btn-secondary">
+            Asset Requests
+          </Link>
           <Link to="/admin/assets/new" className="btn btn-primary">
             Create asset
           </Link>

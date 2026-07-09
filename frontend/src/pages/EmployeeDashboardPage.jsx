@@ -9,6 +9,9 @@ export default function EmployeeDashboardPage() {
   const [assets, setAssets] = useState([])
   const [loadingAssets, setLoadingAssets] = useState(true)
   const [assetsError, setAssetsError] = useState('')
+  const [requests, setRequests] = useState([])
+  const [loadingRequests, setLoadingRequests] = useState(true)
+  const [requestsError, setRequestsError] = useState('')
 
   const loadMyAssets = useCallback(async () => {
     setLoadingAssets(true)
@@ -30,6 +33,27 @@ export default function EmployeeDashboardPage() {
       loadMyAssets()
     }
   }, [loadMyAssets, user])
+
+  const loadMyRequests = useCallback(async () => {
+    setLoadingRequests(true)
+    setRequestsError('')
+    try {
+      const data = await api.listMyAssetRequests(token)
+      setRequests(data)
+    } catch (err) {
+      setRequestsError(
+        err instanceof ApiError ? err.message : 'Unable to load your requests',
+      )
+    } finally {
+      setLoadingRequests(false)
+    }
+  }, [token])
+
+  useEffect(() => {
+    if (user?.role === 'employee' && user.profile_complete) {
+      loadMyRequests()
+    }
+  }, [loadMyRequests, user])
 
   if (!user || user.role !== 'employee') {
     return <Navigate to="/employee/login" replace />
@@ -62,6 +86,12 @@ export default function EmployeeDashboardPage() {
           <p>Scan the asset QR code when returning it to IT.</p>
           <span className="action-cta">Open scanner →</span>
         </Link>
+
+        <Link to="/employee/request" className="action-card">
+          <h2>Request Asset</h2>
+          <p>Submit a request before collecting an asset.</p>
+          <span className="action-cta">Open request form →</span>
+        </Link>
       </div>
 
       <section className="dashboard-panel">
@@ -87,6 +117,37 @@ export default function EmployeeDashboardPage() {
                     <td>{asset.asset_name}</td>
                     <td>{asset.asset_serial_no}</td>
                     <td>{asset.asset_location_id}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="dashboard-panel">
+        <h2>My Requests</h2>
+        {requestsError && <div className="form-error">{requestsError}</div>}
+        {loadingRequests ? (
+          <p>Loading your requests…</p>
+        ) : requests.length === 0 ? (
+          <p>No asset requests submitted yet.</p>
+        ) : (
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Requested Asset</th>
+                  <th>Status</th>
+                  <th>Submitted On</th>
+                </tr>
+              </thead>
+              <tbody>
+                {requests.map((request) => (
+                  <tr key={request.id}>
+                    <td>{request.requested_asset_name || request.category}</td>
+                    <td>{request.status}</td>
+                    <td>{new Date(request.created_at).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
